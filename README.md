@@ -1,5 +1,5 @@
 
-# 이론통계학 2 – Project #1
+# 이론통계학2 – Project #1
 
 확산모형(Diffusion Model)을 이용한 수요예측 및 사례분석
 
