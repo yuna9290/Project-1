@@ -22,9 +22,7 @@
 ## Project Structure
 
 ### Part A – DRAM
-- Bass Model
-- Logistic Model
-- Gumbel Model
+- Bass / Logistic / Gumbel
 - OLS estimation
 - Q-Q plot
 - Market potential estimation
