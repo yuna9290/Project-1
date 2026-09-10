@@ -24,4 +24,4 @@
 
 <br>
 
-역할분담  Part A : 이휘민, Part B-1 : 조유나, Part B-2 : 강재서, Part C, D : 황수연
+역할분담    Part A : 이휘민, Part B-1 : 조유나, Part B-2 : 강재서, Part C, D : 황수연
