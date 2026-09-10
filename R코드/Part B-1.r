@@ -1,4 +1,4 @@
-# Part B-1. COVID-19 사망자 예측
+# Part B-1 : COVID-19 사망자 예측
 # UK daily COVID-19 deaths: 2020-03-07 ~ 2020-08-31
 
 library(readr)
