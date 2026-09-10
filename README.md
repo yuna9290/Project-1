@@ -24,7 +24,19 @@
 
    <br>
 
-**<Part A> : DRAM**
+**\<Part A\> : DRAM 분기별 선적자료 (1982-1995)** <br>
+<br>
+
+**\<Part B-1\> : Covid-19 사망자 예측** <br>
+<br>
+
+**\<Part B-2\> : 미국 및 한국의 HIV/AIDS 확산 예측** <br>
+<br>
+
+**\<Part C\> : 영화 흥행 예측** <br>
+<br>
+
+**\<Part D\> : 수요예측 Shiny Application 만들기** <br>
 
 <br>
 
