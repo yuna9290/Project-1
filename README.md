@@ -1,7 +1,7 @@
 
 # 이론통계학2 – Project #1
 
-확산모형(Diffusion Model)을 이용한 수요예측 및 사례분석
+3 조  242STG28 황수연 252STG26 이휘민 262STG01 강재서 262STG09 조유나
 
 ## Overview
 
