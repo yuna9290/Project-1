@@ -12,8 +12,8 @@
 
 - 256K DRAM 및 1M DRAM
 - UK COVID-19 일별 사망자
-- 미국 HIV/AIDS 누적 환자 수
-- 국내 HIV/AIDS 신규 감염자
+- 미국 HIV/AIDS 감염자
+- 국내 HIV/AIDS 감염자
 - 영화 관객 수
 
 각 자료에 대해 OLS, Q-Q, NLSE, MLE 등의 추정 방법을
