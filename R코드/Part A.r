@@ -1,4 +1,4 @@
-# Part A
+# Part A : DRAM 분기별 선적자료 (1982–1995)
 
 # load libraries
 library(readxl)
