@@ -20,4 +20,8 @@
    Q-Q Plot 기반 추정 방식을 활용한 교차 검증 및 상대 오차 비교 <br>
 
  - 데이터 보정 기법 (Data Calibration) <br>
-   영화 관객 수 분석 시, 주말 및 공휴일의 관객 수 증가(계절성)를 평일 수준으로 스케일링하는 휴일 효과 보정(Holiday Effect Correction) 기법 적용
+   영화 관객 수 분석 시, 주말 및 공휴일의 관객 수 증가(계절성)를 평일 수준으로 스케일링하는 휴일 효과 보정(Holiday Effect Correction) 기법 적용 <br>
+
+<br>
+
+역할분담  <Part A> : 이휘민, <Part B-1>: 조유나, <Part B-2> : 강재서, <Part C, D> : 황수연
