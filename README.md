@@ -3,7 +3,7 @@
 
 <br>
 
-📌 프로젝트 개요 (Project Overview)
+📌 프로젝트 개요 (Project Overview) <br>
 이 프로젝트는 Bass, Logistic, Gumbel, Exponential 등 주요 시계열 확산 모형을 데이터에 적용하여, 신제품의 총수요, 영화 누적 관객 수, 그리고 감염병 누적 확진자 및 사망자 추이를 예측하고 모형 간의 성능을 비교 분석합니다.
 
 📊 주요 분석 방법론 (Key Methodologies)
