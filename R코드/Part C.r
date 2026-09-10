@@ -1,3 +1,5 @@
+# Part C : 영화 흥행 예측
+
 library(readxl)
 library(dplyr)
 library(tidyr)
