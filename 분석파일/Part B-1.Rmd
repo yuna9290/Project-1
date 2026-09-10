@@ -1,0 +1,320 @@
+---
+title: "Part B-1"
+author: "262STG09_조유나"
+date: "2026-09-09"
+output: word_document
+---
+
+
+
+```{r}
+# Part B-1. COVID-19 사망자 예측
+# UK daily COVID-19 deaths: 2020-03-07 ~ 2020-08-31
+
+library(readr)
+
+# 1. 데이터 불러오기 및 전처리
+raw <- read_csv("UK_Covid19.csv")
+
+Covid19 <- data.frame(
+  Day = as.Date(raw$Day),
+  S = raw$`Daily new confirmed deaths due to COVID-19`
+)
+
+Covid19$Y <- cumsum(Covid19$S)
+Covid19$Ylag <- c(0, Covid19$Y[-nrow(Covid19)])
+Covid19$t <- 1:nrow(Covid19)
+
+latest_m <- tail(Covid19$Y, 1)
+latest_m
+
+
+# 2. 시계열 그래프
+
+# 일일 신규 사망자 수
+plot(Covid19$Day, Covid19$S, type = "l", xaxt = "n",
+     xlab = "Date", ylab = "S(t)",
+     main = "UK Daily New COVID-19 Deaths")
+
+axis.Date(1,
+          at = seq(min(Covid19$Day), max(Covid19$Day), by = "1 month"),
+          format = "%b")
+
+
+# 누적 사망자 수
+plot(Covid19$Day, Covid19$Y, type = "l", xaxt = "n",
+     xlab = "Date", ylab = "Y(t)",
+     main = "UK Cumulative COVID-19 Deaths")
+
+axis.Date(1,
+          at = seq(min(Covid19$Day), max(Covid19$Day), by = "1 month"),
+          format = "%b")
+
+
+# 3. OLS: Bass / Logistic / Gumbel
+get_est <- function(n) {
+
+  d <- Covid19[1:n, ]
+
+  # Bass
+  # S_t = a + bY_(t-1) + cY_(t-1)^2 + e_t
+  # a = pm, b = q-p, c = -q/m
+  fit_bass <- lm(S ~ Ylag + I(Ylag^2), data = d)
+
+  a <- unname(coef(fit_bass)[1])
+  b <- unname(coef(fit_bass)[2])
+  c <- unname(coef(fit_bass)[3])
+
+  p <- (-b + sqrt(b^2 - 4*a*c)) / 2
+  q <- b + p
+  m <- a / p
+  
+  d <- Covid19[2:n, ]
+
+  # Logistic
+  # S_t / Y_(t-1) = a + bY_(t-1) + e_t
+  # a = q, b = -q/m
+  fit_logistic <- lm(I(S / Ylag) ~ Ylag, data = d)
+
+  a_log <- unname(coef(fit_logistic)[1])
+  b_log <- unname(coef(fit_logistic)[2])
+
+  q_log <- a_log
+  m_log <- -a_log / b_log
+
+  # Gumbel
+  # S_t / Y_(t-1) = a + b log(Y_(t-1)) + e_t
+  # a = q log(m), b = -q
+  fit_gumbel <- lm(I(S / Ylag) ~ log(Ylag), data = d)
+
+  a_gum <- unname(coef(fit_gumbel)[1])
+  b_gum <- unname(coef(fit_gumbel)[2])
+
+  q_gum <- -b_gum
+  m_gum <- exp(a_gum / q_gum)
+
+  result <- matrix(
+    c(p, q, m,
+      NA, q_log, m_log,
+      NA, q_gum, m_gum),
+    nrow = 3, byrow = TRUE
+  )
+
+  rownames(result) <- c("Bass", "Logistic", "Gumbel")
+  colnames(result) <- c("p", "q", "m")
+
+  return(result)
+}
+
+
+# 4. n = 20, 30, 50 추정
+est20 <- get_est(20)
+est30 <- get_est(30)
+est50 <- get_est(50)
+
+est20
+est30
+est50
+
+
+# 5. 상대오차 계산
+# 상대오차(%) = 100 * (추정 m - 실제 최신 누적값) / 실제 최신 누적값
+calc_error <- function(est) {
+  100 * (est[, "m"] - latest_m) / latest_m
+}
+
+error20 <- calc_error(est20)
+error30 <- calc_error(est30)
+error50 <- calc_error(est50)
+
+error20
+error30
+error50
+
+
+# 6. 결과표
+result_20 <- data.frame(
+  Model = rownames(est20),
+  p = est20[, "p"],
+  q = est20[, "q"],
+  m = est20[, "m"],
+  Relative_Error = error20
+)
+
+result_30 <- data.frame(
+  Model = rownames(est30),
+  p = est30[, "p"],
+  q = est30[, "q"],
+  m = est30[, "m"],
+  Relative_Error = error30
+)
+
+result_50 <- data.frame(
+  Model = rownames(est50),
+  p = est50[, "p"],
+  q = est50[, "q"],
+  m = est50[, "m"],
+  Relative_Error = error50
+)
+
+result_20
+result_30
+result_50
+
+
+# 7. Gumbel OLS 결과
+gumbel_ols <- data.frame(
+  n = c(20, 30, 50),
+  q = c(est20["Gumbel", "q"],
+        est30["Gumbel", "q"],
+        est50["Gumbel", "q"]),
+  m = c(est20["Gumbel", "m"],
+        est30["Gumbel", "m"],
+        est50["Gumbel", "m"])
+)
+
+gumbel_ols
+
+
+# 8. NLSE
+gumbel_nls <- function(n, start_m, start_q, start_mu) {
+
+  d <- Covid19[1:n, ]
+
+  fit <- nls(
+    S ~ m * (
+      exp(-exp(-q * (t - mu))) -
+      exp(-exp(-q * (t - 1 - mu)))
+    ),
+    data = d,
+    start = list(
+      m = start_m,
+      q = start_q,
+      mu = start_mu
+    ),
+    algorithm = "port",
+    lower = c(m = 0.000001, q = 0.000001, mu = -Inf),
+    upper = c(m = 1000000, q = 10, mu = Inf)
+  )
+
+  coef(fit)
+}
+
+
+# 9. MLE
+# Gumbel CDF
+gumbel_F <- function(t, q, mu) {
+  exp(-exp(-q * (t - mu)))
+}
+
+gumbel_mle <- function(n, start_m, start_q, start_mu) {
+
+  d <- Covid19[1:n, ]
+  t <- d$t
+
+  loglik <- function(par) {
+
+    m <- exp(par[1])
+    q <- exp(par[2])
+    mu <- par[3]
+
+    F_t <- gumbel_F(t, q, mu)
+    F_prev <- gumbel_F(t - 1, q, mu)
+
+    lambda <- m * (F_t - F_prev)
+
+    if (any(lambda <= 0) || any(!is.finite(lambda))) {
+      return(1e100)
+    }
+
+    -sum(dpois(d$S, lambda = lambda, log = TRUE))
+  }
+
+  fit <- optim(
+    par = c(log(start_m), log(start_q), start_mu),
+    fn = loglik,
+    method = "L-BFGS-B",
+    lower = c(log(1), log(0.000001), -100),
+    upper = c(log(1000000), log(10), 100)
+  )
+
+  c(
+    m = exp(fit$par[1]),
+    q = exp(fit$par[2]),
+    mu = fit$par[3]
+  )
+}
+
+
+# 10. n = 20, 30, 50 추정
+# OLS 결과를 초기값으로 사용
+
+nlse_result <- data.frame(
+  n = gumbel_ols$n,
+  m = NA,
+  q = NA,
+  mu = NA
+)
+
+mle_result <- data.frame(
+  n = gumbel_ols$n,
+  m = NA,
+  q = NA,
+  mu = NA
+)
+
+for (i in 1:nrow(gumbel_ols)) {
+  
+  n <- gumbel_ols$n[i]
+  m <- gumbel_ols$m[i]
+  q <- gumbel_ols$q[i]
+  
+  # mu 초기값 계산
+  mu <- n + log(-log(Covid19$Y[n] / m)) / q
+  
+  # NLSE
+  nlse <- gumbel_nls(n, m, q, mu)
+  
+  nlse_result[i, "m"] <- nlse["m"]
+  nlse_result[i, "q"] <- nlse["q"]
+  nlse_result[i, "mu"] <- nlse["mu"]
+  
+  # MLE
+  mle <- gumbel_mle(n, m, q, mu)
+  
+  mle_result[i, "m"] <- mle["m"]
+  mle_result[i, "q"] <- mle["q"]
+  mle_result[i, "mu"] <- mle["mu"]
+}
+
+nlse_result
+mle_result
+
+
+# 11. OLS / NLSE / MLE 결과 정리
+comparison <- data.frame(
+  n = gumbel_ols$n,
+  OLS = gumbel_ols$m,
+  NLSE = nlse_result$m,
+  MLE = mle_result$m
+)
+
+comparison
+
+
+# 12. 추정방법별 상대오차
+relative_error <- data.frame(
+  n = gumbel_ols$n,
+  
+  OLS = 100 * (gumbel_ols$m - latest_m) / latest_m,
+  NLSE = 100 * (nlse_result$m - latest_m) / latest_m,
+  MLE = 100 * (mle_result$m - latest_m) / latest_m
+)
+
+relative_error
+```
+
+
+
+
+
