@@ -51,12 +51,12 @@ R Shiny를 이용하여 확산모형을 선택하고
 
 ## Methods
 
-| Model | Description |
-|---|---|
-| Bass | 혁신계수와 모방계수를 이용한 확산모형 |
-| Logistic | 로지스틱 성장모형 |
-| Gumbel | 비대칭 확산 패턴을 고려한 모형 |
-| Exponential | 지수적 성장모형 |
+| Model | Description | Formula |
+|---|---|---|
+| Bass | 혁신계수와 모방계수를 이용한 확산모형 | $S(t)=m\frac{1-e^{-(p+q)t}}{1+\frac{q}{p}e^{-(p+q)t}}$ |
+| Logistic | 로지스틱 성장모형 | $S(t)=\frac{m}{1+e^{-q(t-t_0)}}$ |
+| Gumbel | 비대칭 확산 패턴을 고려한 모형 | $S(t)=m\exp(-e^{-q(t-t_0)})$ |
+| Exponential | 지수적 성장모형 | $S(t)=ae^{bt}$ |
 
 ## Authors
 
